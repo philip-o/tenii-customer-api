@@ -1,18 +1,18 @@
-#tenii-customer-api
+# tenii-customer-api
 
 API for the customer portion of the tenii app
 
-###API allows users to do the following:
+### API allows users to do the following:
  
-#####register
+##### register
 
-#####login
+##### login
 
-#####reset their password
+##### reset their password
 
-#####verify new account
+##### verify new account
 
-##TODO
+## TODO
 
 Check when user last logged in?
 Return password if valid user or reject and log ip address
