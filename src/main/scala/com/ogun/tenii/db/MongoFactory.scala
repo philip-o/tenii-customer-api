@@ -3,8 +3,7 @@ package com.ogun.tenii.db
 import java.util.Date
 
 import com.mongodb.casbah.Imports._
-import com.ogun.tenii.domain.common.Roar.Roar
-import com.ogun.tenii.domain.common.{ Address, License, Passport, RoarType }
+import com.ogun.tenii.domain.common.{ Address, Passport, RoarType }
 import com.typesafe.scalalogging.LazyLogging
 
 object MongoFactory {
