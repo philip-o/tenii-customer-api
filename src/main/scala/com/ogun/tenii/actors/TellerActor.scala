@@ -71,7 +71,8 @@ trait TellerEndpoints {
   val appId = "application_id="
   val accounts = "/accounts"
   val permissions = "balance:true,full_account_number:true,transaction_history:true"
-  val requiredPermissions = permissions.split(",").map(_.split(":")).map(perm => TellerPermissions(perm(0), perm(1).toBoolean)).toList
+  val requiredPermissions = permissions.split(",").map(_.split(":"))
+    .map(perm => TellerPermissions(perm(0), Boolean.unbox(perm(1)))).toList
 
   implicit def onSuccessDecodingError[TellerResponse](decodingError: io.circe.Error): TellerResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
   implicit def onErrorDecodingError[TellerResponse](decodingError: String): TellerResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
