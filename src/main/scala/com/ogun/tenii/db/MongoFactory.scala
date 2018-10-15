@@ -68,6 +68,16 @@ trait ObjectMongoConnection[A] extends LazyLogging {
     }
   }
 
+  protected def findAll(error: String) = {
+    val cursor = retrieveCollection.find()
+    if (cursor.isEmpty) {
+      logger.error(error)
+      Nil
+    } else {
+      cursor.map(c => revert(c)).toList
+    }
+  }
+
   protected def transform(obj: A): MongoDBObject
 
   protected def revert(obj: MongoDBObject): A
