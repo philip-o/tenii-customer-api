@@ -12,3 +12,7 @@ case class TellerRegisterRequest(title: String = "Mr", forename: String, surname
 case class TellerTeniiPotCreateRequest(tellerUserId: String, limit: Double)
 
 case class TellerTeniiPotCreateResponse(tellerUserId: String, cause: Option[String] = None)
+
+case class TellerLoginRequest(email: String, password: String, ipAddress: String)
+
+case class TellerLoginResponse(token: String, cause: Option[String] = None)

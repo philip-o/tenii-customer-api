@@ -42,7 +42,6 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
       }
     //Check ip hasn't been blocked or given a timeout, if blocked return unable to submit request you have been blocked
     //Check password is valid, if not return invalid password failure
-
     case req: TellerRegisterRequest =>
       val ref = sender()
       val emailSearch = tellerConnection.findByEmail(req.email)
@@ -82,7 +81,25 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
           logger.error("Unable to find user due to", t)
           ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
       }
-
+    case request: TellerLoginRequest =>
+      val ref = sender()
+      Future {
+        connection.findByUsername(request.email)
+      } onComplete {
+        case Success(result) =>
+          result match {
+            case None => ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
+            case Some(user) => //TODO Check user has verified
+              if (user.password.equals(request.password)) {
+                ref ! result.get.username
+              } else {
+                ref ! LoginResponse(success = false, Some("INCORRECT_PASSWORD"))
+              }
+          }
+        case Failure(t) =>
+          logger.error("Unable to find user due to", t)
+          ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
+      }
     case request: PasswordUserLookupRequest =>
       val senderRef = sender()
       Future {
@@ -100,7 +117,6 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
         case None => logger.error(s"No user found, investigate and assign user for ${request.token}")
       }
     }
-
     case other => logger.error(s"Received unknown message, please check: $other")
   }
 }

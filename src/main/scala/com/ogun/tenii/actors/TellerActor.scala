@@ -50,12 +50,17 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Payme
         case Success(_) => senderRef ! s"$tellerHost$auth$appId$tellerAppId&permissions=$permissions"
         case Failure(t) => logger.error(s"Error thrown when attempting to register user", t)
       }
-    case request: LoginRequest =>
+    case request: TellerLoginRequest =>
       val senderRef = sender()
       implicit val timeout: Timeout = Timeout(10.seconds)
       (userActor ? request) onComplete {
-        case Success(resp) => senderRef ! resp
+        case Success(resp) =>
+          resp match {
+            case res: LoginResponse => senderRef ! TellerLoginResponse("", res.errorCode)
+            case string: String => senderRef ! TellerLoginResponse(string)
+          }
         case Failure(t) => logger.error(s"Error thrown when attempting to find user user", t)
+          senderRef ! TellerLoginResponse("", Some(s"Error thrown when attempting to find user user"))
       }
     case other =>
       logger.info(s"Unknown message received: $other")
@@ -72,7 +77,15 @@ trait TellerEndpoints {
   val accounts = "/accounts"
   val permissions = "balance:true,full_account_number:true,transaction_history:true"
   val requiredPermissions = permissions.split(",").map(_.split(":"))
-    .map(perm => TellerPermissions(perm(0), Boolean.unbox(perm(1)))).toList
+    .map(perm => TellerPermissions(perm(0), calculateBool(perm(1)))).toList
+
+
+  def calculateBool(bool: String) : Boolean = {
+    bool match {
+      case "true" => true
+      case _ => false
+    }
+  }
 
   implicit def onSuccessDecodingError[TellerResponse](decodingError: io.circe.Error): TellerResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
   implicit def onErrorDecodingError[TellerResponse](decodingError: String): TellerResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
