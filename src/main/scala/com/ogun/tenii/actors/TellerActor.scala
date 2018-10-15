@@ -93,9 +93,4 @@ trait PaymentsEndpoints {
 
   val paymentsApiHost = "https://tenii-payments-api.heroku.com/"
   val createPot = "teller/createPot/"
-
-  implicit def onSuccessDecodingError[TellerTeniiPotCreateResponse](decodingError: io.circe.Error): TellerTeniiPotCreateResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
-  implicit def onErrorDecodingError[TellerTeniiPotCreateResponse](decodingError: String): TellerTeniiPotCreateResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
-
-
 }
