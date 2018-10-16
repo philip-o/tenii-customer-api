@@ -53,7 +53,7 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
 
 class TellerUserConnection extends ObjectMongoConnection[TellerUser] with LazyLogging {
 
-  val collection = "users"
+  val collection = "tellerUsers"
 
   override def transform(obj: TellerUser): MongoDBObject = {
     MongoDBObject("_id" -> obj.id, "title" -> obj.title, "forename" -> obj.forename, "surname" -> obj.surname,

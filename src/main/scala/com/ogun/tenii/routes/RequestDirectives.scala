@@ -9,6 +9,9 @@ trait RequestDirectives extends Directives {
   val permissionsDirective: Directive1[List[TellerPermissions]] = parameter("permissions").map(perm => perm.split(",")
     .map(va => TellerPermissions(va.split(":")(0).toString, va.split(":")(1).toBoolean)).toList)
 
+  val userIdDirective: Directive1[String] = parameter("userId")
+
+
   //val prebookingTokenDirective = parameter("preBookingToken".?).map(_.map(PreBookingToken))
 
   // def validateRequest(req: BookRequest): Directive0 = {

@@ -7,7 +7,6 @@ import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.TellerActor
 import com.ogun.tenii.domain.api._
-import com.ogun.tenii.domain.teller.TellerResponse
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -25,31 +24,22 @@ class TellerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
   protected val tellerActor: ActorRef = system.actorOf(Props(classOf[TellerActor]))
 
   def route: Route = pathPrefix("teller") {
-    teller ~ tellerPostAuth ~ register
+    tellerPostAuth ~ register
   }
 
   def register: Route = {
-    post {
-      (path("register") & entity(as[TellerRegisterRequest])) { request =>
-        logger.info(s"POST register - $request")
-        onCompleteWithBreaker(breaker)(tellerActor ? request) {
-          case Success(msg: String) => redirect(msg, StatusCodes.PermanentRedirect)
-          case Failure(t) => failWith(t)
+      post {
+        path("register") {
+          entity(as[TellerRegisterRequest]) { request =>
+            logger.info(s"POST register - $request")
+            onCompleteWithBreaker(breaker)(tellerActor ? request) {
+              case Success(msg: String) => logger.info(s"URL is $msg")
+                redirect(msg, StatusCodes.PermanentRedirect)
+              case Failure(t) => failWith(t)
+            }
+          }
         }
       }
-    }
-  }
-
-  def teller: Route = {
-    post {
-      entity(as[TellerLoginRequest]) { request =>
-        logger.info(s"POST teller - $request")
-        onCompleteWithBreaker(breaker)(tellerActor ? request) {
-          case Success(msg: List[TellerResponse]) => complete(StatusCodes.OK -> msg)
-          case Failure(t) => failWith(t)
-        }
-      }
-    }
   }
 
   def tellerPostAuth: Route = {
@@ -57,7 +47,8 @@ class TellerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
       (path("postauth") & accessTokenDirective & permissionsDirective).as(TellerAPIPermissionsResponse) { request =>
         logger.info(s"GET teller/postauth - $request")
         onCompleteWithBreaker(breaker)(tellerActor ? request) {
-          case Success(msg: String) => complete(StatusCodes.OK -> msg)
+          case Success(msg: TellerPermissionsResponse) if msg.cause.isEmpty => complete(StatusCodes.OK -> msg)
+          case Success(msg: TellerPermissionsResponse) => complete(StatusCodes.NotAcceptable -> msg)
           case Failure(t) => failWith(t)
         }
       }
