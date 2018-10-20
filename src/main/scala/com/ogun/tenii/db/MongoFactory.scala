@@ -133,7 +133,7 @@ trait ObjectMongoConnection[A] extends LazyLogging {
       res.get(0).asInstanceOf[String]
     )
     if (res.size() == 2)
-      roarType.copy(limit = res.get(1).asInstanceOf[Option[Int]])
+      roarType.copy(limit = Option(res.get(1).asInstanceOf[Int]))
     else
       roarType
   }
