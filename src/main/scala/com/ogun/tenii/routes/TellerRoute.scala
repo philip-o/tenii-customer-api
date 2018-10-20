@@ -34,7 +34,7 @@ class TellerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
             logger.info(s"POST register - $request")
             onCompleteWithBreaker(breaker)(tellerActor ? request) {
               case Success(msg: String) => logger.info(s"URL is $msg")
-                redirect(msg, StatusCodes.PermanentRedirect)
+                complete(StatusCodes.OK -> msg)
               case Failure(t) => failWith(t)
             }
           }
