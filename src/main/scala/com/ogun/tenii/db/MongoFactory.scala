@@ -88,10 +88,9 @@ trait ObjectMongoConnection[A] extends LazyLogging {
 
   protected def getOptional[B](obj: MongoDBObject, name: String) = {
     val res = getVar(obj, name)
-    if(res.get.isInstanceOf[String]) {
-      Option(res.get.asInstanceOf[String])
-    }
-    else if(res.get.asInstanceOf[Option[B]] == Some)
+    if(res.get.isInstanceOf[Option[B]])
+      res.asInstanceOf[Option[B]]
+    else if(res.get.isInstanceOf[String])
       res.asInstanceOf[Option[B]]
     else None
   }
