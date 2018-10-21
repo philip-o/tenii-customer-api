@@ -84,14 +84,14 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
     case request: TellerLoginRequest =>
       val ref = sender()
       Future {
-        connection.findByUsername(request.email)
+        tellerConnection.findByEmail(request.email)
       } onComplete {
         case Success(result) =>
           result match {
             case None => ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
             case Some(user) => //TODO Check user has verified
               if (user.password.equals(request.password)) {
-                ref ! result.get.username
+                ref ! result.get.tellerId.get
               } else {
                 ref ! LoginResponse(success = false, Some("INCORRECT_PASSWORD"))
               }
@@ -110,10 +110,8 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
           logger.error(s"Could not find the user due to an error", t)
           senderRef ! PasswordUserLookupResponse(request.actorRef, None)
       }
-
     case request: TellerAPIPermissionsResponse => Future {
-      val res = tellerConnection.findByNoTellerId()
-      res match {
+      tellerConnection.findByNoTellerId() match {
         case Some(user) => tellerConnection.save(user.copy(tellerId = Some(request.token)))
         case None => logger.error(s"No user found, investigate and assign user for ${request.token}")
       }

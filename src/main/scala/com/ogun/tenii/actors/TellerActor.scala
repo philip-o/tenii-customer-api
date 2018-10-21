@@ -57,7 +57,12 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Payme
         case Success(resp) =>
           resp match {
             case res: LoginResponse => senderRef ! TellerLoginResponse("", res.errorCode)
-            case string: String => senderRef ! TellerLoginResponse(string)
+            case string: String =>
+              implicit val timeout2 : FiniteDuration = 10.seconds
+              http.endpointGet[List[TellerResponse]](s"$apiHost$accounts", ("Authorization", s"Bearer $string")).onComplete {
+              case Success(resp) => senderRef ! resp
+              case Failure(t) => sender() ! t
+            }
           }
         case Failure(t) => logger.error(s"Error thrown when attempting to find user user", t)
           senderRef ! TellerLoginResponse("", Some(s"Error thrown when attempting to find user user"))
