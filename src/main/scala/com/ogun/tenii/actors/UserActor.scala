@@ -112,7 +112,8 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
       }
 
     case request: TellerAPIPermissionsResponse => Future {
-      tellerConnection.findByNoTellerId() match {
+      val res = tellerConnection.findByNoTellerId()
+      res match {
         case Some(user) => tellerConnection.save(user.copy(tellerId = Some(request.token)))
         case None => logger.error(s"No user found, investigate and assign user for ${request.token}")
       }

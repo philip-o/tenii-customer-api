@@ -86,7 +86,12 @@ trait ObjectMongoConnection[A] extends LazyLogging {
 
   protected def getString(obj: MongoDBObject, name: String) = getVar(obj, name).getOrElse("").asInstanceOf[String]
 
-  protected def getOptional[B](obj: MongoDBObject, name: String) = getVar(obj, name).asInstanceOf[Option[B]]
+  protected def getOptional[B](obj: MongoDBObject, name: String) = {
+    val res = getVar(obj, name)
+    if(res.get.asInstanceOf[Option[B]] == Some)
+      res.asInstanceOf[Option[B]]
+    else None
+  }
 
   protected def getObjectId(obj: MongoDBObject, name: String) = getVar(obj, name).asInstanceOf[Option[ObjectId]].get
 

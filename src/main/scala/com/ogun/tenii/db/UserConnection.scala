@@ -81,7 +81,7 @@ class TellerUserConnection extends ObjectMongoConnection[TellerUser] with LazyLo
     if(list.isEmpty)
       None
     else {
-      list.find(_.tellerId.isEmpty)
+      list.find(_.tellerId.getOrElse("None") == "None")
     }
   }
 
