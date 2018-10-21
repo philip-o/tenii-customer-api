@@ -104,6 +104,6 @@ trait TellerEndpoints {
 
 trait PaymentsEndpoints {
 
-  val paymentsApiHost = "https://tenii-payments-api.heroku.com/"
+  val paymentsApiHost = "https://tenii-payments-api.herokuapp.com/"
   val createPot = "teller/createPot/"
 }
