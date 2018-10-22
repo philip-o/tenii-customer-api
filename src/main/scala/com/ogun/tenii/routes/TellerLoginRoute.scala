@@ -7,7 +7,7 @@ import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.TellerActor
 import com.ogun.tenii.domain.api._
-import com.ogun.tenii.domain.teller.TellerResponse
+import com.ogun.tenii.domain.teller.TellerAccountsResponse
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -33,7 +33,7 @@ class TellerLoginRoute(implicit system: ActorSystem, breaker: CircuitBreaker) ex
       entity(as[TellerLoginRequest]) { request =>
         logger.info(s"POST login - $request")
         onCompleteWithBreaker(breaker)(tellerActor ? request) {
-          case Success(msg: List[TellerResponse]) => complete(StatusCodes.OK -> msg)
+          case Success(msg: TellerAccountsResponse) => complete(StatusCodes.OK -> msg)
           case Failure(t) => failWith(t)
         }
       }

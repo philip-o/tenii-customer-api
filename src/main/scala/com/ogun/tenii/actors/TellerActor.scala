@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.ogun.tenii.domain.api._
-import com.ogun.tenii.domain.teller.TellerResponse
+import com.ogun.tenii.domain.teller.{TellerAccountsResponse, TellerResponse}
 import com.ogun.tenii.external.HttpTransfers
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -60,7 +60,7 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Payme
             case string: String =>
               implicit val timeout2 : FiniteDuration = 10.seconds
               http.endpointGet[List[TellerResponse]](s"$apiHost$accounts", ("Authorization", s"Bearer $string")).onComplete {
-              case Success(resp) => senderRef ! resp
+              case Success(resp) => senderRef ! TellerAccountsResponse(string, resp)
               case Failure(t) => sender() ! t
             }
           }
