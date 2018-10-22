@@ -9,7 +9,7 @@ case class TellerPermissionsResponse(token: Option[String], cause: Option[String
 case class TellerRegisterRequest(title: String = "Mr", forename: String, surname: String, dob: String,
                            password: String, mobile: String, email: String, roarType: RoarType, ipAddress: String)
 
-case class TellerTeniiPotCreateRequest(tellerUserId: String, limit: Double)
+case class TellerTeniiPotCreateRequest(tellerUserId: String, limit: Int)
 
 case class TellerTeniiPotCreateResponse(tellerUserId: String, cause: Option[String] = None)
 
