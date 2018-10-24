@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.ogun.tenii.domain.api._
-import com.ogun.tenii.domain.teller.{TellerAccountsResponse, TellerResponse}
+import com.ogun.tenii.domain.teller.{TellerAccountsRequest, TellerAccountsResponse, TellerResponse}
 import com.ogun.tenii.external.HttpTransfers
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.{Failure, Properties, Success}
 
-class TellerActor extends Actor with TellerEndpoints with LazyLogging with PaymentsEndpoints {
+class TellerActor extends Actor with TellerEndpoints with LazyLogging with TeniiEndpoints {
 
   implicit val system : ActorSystem = context.system
   val http = new HttpTransfers()
@@ -39,7 +39,7 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Payme
       }
     case request : LoginRequest =>
       val senderRef = sender()
-      http.endpointGet[List[TellerResponse]](s"$apiHost$accounts", ("Authorization", s"Bearer ${request.username}")).onComplete {
+      http.endpointGet[List[TellerResponse]](s"$productsApiHost$bankAccounts", ("Authorization", s"Bearer ${request.username}")).onComplete {
         case Success(resp) => senderRef ! resp
         case Failure(t) => sender() ! t
       }
@@ -57,11 +57,11 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Payme
         case Success(resp) =>
           resp match {
             case res: LoginResponse => senderRef ! TellerLoginResponse("", res.errorCode)
-            case string: String =>
+            case id: String =>
               implicit val timeout2 : FiniteDuration = 10.seconds
-              http.endpointGet[List[TellerResponse]](s"$apiHost$accounts", ("Authorization", s"Bearer $string")).onComplete {
-              case Success(resp) => senderRef ! TellerAccountsResponse(string, resp)
-              case Failure(t) => sender() ! t
+              http.endpoint[TellerAccountsRequest, List[TellerResponse]](s"$productsApiHost$bankAccounts", TellerAccountsRequest(id)).onComplete {
+                case Success(resp) => senderRef ! TellerAccountsResponse(id, resp)
+                case Failure(t) => sender() ! t
             }
           }
         case Failure(t) => logger.error(s"Error thrown when attempting to find user user", t)
@@ -107,8 +107,11 @@ trait TellerEndpoints {
   }
 }
 
-trait PaymentsEndpoints {
+trait TeniiEndpoints {
 
   val paymentsApiHost = "https://tenii-payments-api.herokuapp.com/"
+  val productsApiHost = "https://tenii-products-api.herokuapp.com/"
   val createPot = "teller/createPot/"
+  val bankAccounts = "teller/bankAccounts"
 }
+

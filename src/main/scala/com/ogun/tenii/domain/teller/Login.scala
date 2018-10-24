@@ -24,3 +24,5 @@ case class Links(transactions: String)
 case class TellerFailure(cause: String)
 
 case class TellerAccountsResponse(id: String, accounts: List[TellerResponse])
+
+case class TellerAccountsRequest(id: String)
