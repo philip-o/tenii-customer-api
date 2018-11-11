@@ -76,10 +76,8 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Tenii
 trait TellerEndpoints {
 
   val tellerHost = "https://teller.io/"
-  val apiHost = "https://api.teller.io"
   val auth = "auth/authorize?"
   val appId = "application_id="
-  val accounts = "/accounts"
   val permissions = "balance:true,full_account_number:true,transaction_history:true"
   val requiredPermissions = permissions.split(",").map(_.split(":"))
     .map(perm => TellerPermissions(perm(0), calculateBool(perm(1)))).toList

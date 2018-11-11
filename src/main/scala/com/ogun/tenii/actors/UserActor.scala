@@ -42,7 +42,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
       }
     //Check ip hasn't been blocked or given a timeout, if blocked return unable to submit request you have been blocked
     //Check password is valid, if not return invalid password failure
-    case req: TellerRegisterRequest =>
+    case req: TellerRegisterRequest | TrulayerRegisterRequest =>
       val ref = sender()
       val emailSearch = tellerConnection.findByEmail(req.email)
       val mobileSearch = tellerConnection.findByMobile(req.mobile)
