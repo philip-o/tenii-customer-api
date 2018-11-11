@@ -16,7 +16,7 @@ import scala.concurrent.duration.FiniteDuration
 
 class HttpTransfers(implicit system: ActorSystem) extends LazyLogging {
 
-  implicit private val sttpBackend : SttpBackend[Future, Source[ByteString, Any]] = AkkaHttpBackend.usingActorSystem(system)
+  implicit private val sttpBackend: SttpBackend[Future, Source[ByteString, Any]] = AkkaHttpBackend.usingActorSystem(system)
 
   def endpoint[T, U](endpoint: String, requestBody: T)(implicit timeout: FiniteDuration, encoder: Encoder[T], decoder: Decoder[U], onSuccess: U => U, onSuccessDecodingError: io.circe.Error => U, onErrorDecodingError: String => U): Future[U] = {
     sttp
@@ -50,12 +50,12 @@ class HttpTransfers(implicit system: ActorSystem) extends LazyLogging {
       case Left(errorMsg) =>
         logger.error(s"upstream response: http code: ${res.code}, message: $errorMsg")
         onErrorDecodingError(s"upstream response: http code: ${res.code}, message: $errorMsg")
-//        io.circe.parser.decode[Error](errorMsg) match {
-//          case Right(errorList) => onSuccessDecodingError(errorList)
-//          case Left(decodingError) =>
-//            logger.error(s"Error decoding upstream error response: $decodingError, response: $errorMsg")
-//            onErrorDecodingError(decodingError, errorMsg)
-//        }
+      //        io.circe.parser.decode[Error](errorMsg) match {
+      //          case Right(errorList) => onSuccessDecodingError(errorList)
+      //          case Left(decodingError) =>
+      //            logger.error(s"Error decoding upstream error response: $decodingError, response: $errorMsg")
+      //            onErrorDecodingError(decodingError, errorMsg)
+      //        }
     }
   }
 }

@@ -1,9 +1,9 @@
 package com.ogun.tenii.routes
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import akka.pattern.{CircuitBreaker, ask}
+import akka.pattern.{ CircuitBreaker, ask }
 import akka.util.Timeout
 import com.ogun.tenii.actors.TellerActor
 import com.ogun.tenii.domain.api._
@@ -15,7 +15,7 @@ import javax.ws.rs.Path
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 @Path("/tellerLogin")
 class TellerLoginRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {

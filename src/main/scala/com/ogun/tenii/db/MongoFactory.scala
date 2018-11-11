@@ -3,7 +3,7 @@ package com.ogun.tenii.db
 import java.util.Date
 
 import com.mongodb.casbah.Imports._
-import com.ogun.tenii.domain.common.{Address, Passport, RoarType}
+import com.ogun.tenii.domain.common.{ Address, Passport, RoarType }
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Properties
@@ -88,9 +88,9 @@ trait ObjectMongoConnection[A] extends LazyLogging {
 
   protected def getOptional[B](obj: MongoDBObject, name: String) = {
     val res = getVar(obj, name)
-    if(res.get.isInstanceOf[Option[B]])
+    if (res.get.isInstanceOf[Option[B]])
       res.asInstanceOf[Option[B]]
-    else if(res.get.isInstanceOf[String])
+    else if (res.get.isInstanceOf[String])
       res.asInstanceOf[Option[B]]
     else None
   }

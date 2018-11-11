@@ -1,9 +1,9 @@
 package com.ogun.tenii.routes
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import akka.pattern.{CircuitBreaker, ask}
+import akka.pattern.{ CircuitBreaker, ask }
 import akka.util.Timeout
 import com.ogun.tenii.actors.TrulayerActor
 import com.ogun.tenii.domain.api.TrulayerRegisterRequest
@@ -14,10 +14,10 @@ import javax.ws.rs.Path
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 @Path("trulayer")
-class TrulayerRoute (implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
+class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
 
   implicit val executor: ExecutionContext = system.dispatcher
   implicit val timeout: Timeout = Timeout(10.seconds)
@@ -33,7 +33,8 @@ class TrulayerRoute (implicit system: ActorSystem, breaker: CircuitBreaker) exte
         entity(as[TrulayerRegisterRequest]) { request =>
           logger.info(s"POST register - $request")
           onCompleteWithBreaker(breaker)(trulayerActor ? request) {
-            case Success(msg: String) => logger.info(s"URL is $msg")
+            case Success(msg: String) =>
+              logger.info(s"URL is $msg")
               complete(StatusCodes.OK -> msg)
             case Failure(t) => failWith(t)
           }

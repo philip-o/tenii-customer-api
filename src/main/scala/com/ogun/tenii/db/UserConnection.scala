@@ -1,7 +1,7 @@
 package com.ogun.tenii.db
 
 import com.mongodb.casbah.Imports._
-import com.ogun.tenii.domain.db.{TellerUser, User}
+import com.ogun.tenii.domain.db.{ TellerUser, User }
 import com.typesafe.scalalogging.LazyLogging
 
 class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
@@ -49,8 +49,6 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
   }
 }
 
-
-
 class TellerUserConnection extends ObjectMongoConnection[TellerUser] with LazyLogging {
 
   val collection = "tellerUsers"
@@ -76,9 +74,9 @@ class TellerUserConnection extends ObjectMongoConnection[TellerUser] with LazyLo
   def findById(id: String): Option[TellerUser] =
     findByObjectId(id, s"No user found with id: $id")
 
-  def findByNoTellerId() : Option[TellerUser] = {
+  def findByNoTellerId(): Option[TellerUser] = {
     val list = findAll("No users in collection")
-    if(list.isEmpty)
+    if (list.isEmpty)
       None
     else {
       list.find(_.tellerId.getOrElse("None") == "None")

@@ -1,9 +1,9 @@
 package com.ogun.tenii.routes
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
-import akka.pattern.{CircuitBreaker, ask}
+import akka.pattern.{ CircuitBreaker, ask }
 import akka.util.Timeout
 import com.ogun.tenii.actors.TellerActor
 import com.ogun.tenii.domain.api._
@@ -14,7 +14,7 @@ import javax.ws.rs.Path
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 @Path("/teller")
 class TellerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
@@ -28,18 +28,19 @@ class TellerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
   }
 
   def register: Route = {
-      post {
-        path("register") {
-          entity(as[TellerRegisterRequest]) { request =>
-            logger.info(s"POST register - $request")
-            onCompleteWithBreaker(breaker)(tellerActor ? request) {
-              case Success(msg: String) => logger.info(s"URL is $msg")
-                complete(StatusCodes.OK -> msg)
-              case Failure(t) => failWith(t)
-            }
+    post {
+      path("register") {
+        entity(as[TellerRegisterRequest]) { request =>
+          logger.info(s"POST register - $request")
+          onCompleteWithBreaker(breaker)(tellerActor ? request) {
+            case Success(msg: String) =>
+              logger.info(s"URL is $msg")
+              complete(StatusCodes.OK -> msg)
+            case Failure(t) => failWith(t)
           }
         }
       }
+    }
   }
 
   def tellerPostAuth: Route = {
