@@ -26,7 +26,7 @@ class TrulayerActor extends Actor with LazyLogging with TrulayerEndpoint {
       val senderRef = sender()
       implicit val timeout: Timeout = Timeout(10.seconds)
       (userActor ? request) onComplete {
-        case Success(_) => senderRef ! s"$trulayerHost$responseType&$clientIdParam$clientId&$nonceParam=${UUID.randomUUID().toString}&$permissionsParam"
+        case Success(_) => senderRef ! s"$trulayerHost$responseType&$clientIdParam$clientId&$nonceParam${UUID.randomUUID().toString}&$permissionsParam"
         case Failure(t) => logger.error(s"Error thrown when attempting to register user", t)
       }
 
