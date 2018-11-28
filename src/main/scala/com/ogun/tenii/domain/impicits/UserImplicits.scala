@@ -23,7 +23,9 @@ trait UserImplicits {
       identification = request.id,
       ipAddress = request.ipAddress,
       email = request.email,
-      roarType = request.roarType
+      roarType = request.roarType,
+      accessToken = None,
+      refreshToken = None
     )
   }
 
@@ -50,7 +52,9 @@ trait UserImplicits {
       ),
       ipAddress = request.ipAddress,
       email = request.email,
-      roarType = request.roarType
+      roarType = request.roarType,
+      accessToken = None,
+      refreshToken = None
     )
   }
 

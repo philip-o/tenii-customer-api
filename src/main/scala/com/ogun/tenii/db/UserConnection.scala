@@ -11,7 +11,7 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
   override def transform(obj: User): MongoDBObject = {
     MongoDBObject("_id" -> obj.id, "title" -> obj.title, "forename" -> obj.forename, "middle" -> obj.middle, "surname" -> obj.surname, "address" -> obj.address,
       "dob" -> obj.dob, "username" -> obj.username, "password" -> obj.password, "mobile" -> obj.mobile, "identification" -> obj.identification,
-      "ipAddress" -> obj.ipAddress, "email" -> obj.email, "roarType" -> obj.roarType)
+      "ipAddress" -> obj.ipAddress, "email" -> obj.email, "roarType" -> obj.roarType, "accessToken" -> obj.accessToken, "refreshToken" -> obj.refreshToken)
   }
 
   def findByUsername(name: String): Option[User] = {
@@ -26,8 +26,15 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
     findByProperty("mobile", mobile, s"No user found with mobile: $mobile")
   }
 
-  def findById(id: String): Option[User] =
-    findByObjectId(id, s"No user found with id: $id")
+  def findById(id: String): Option[User] = findByObjectId(id, s"No user found with id: $id")
+
+  def findByNoAccessToken(): Option[User] = {
+    findAll(s"No users found").find(_.accessToken.isEmpty)
+  }
+
+  def findByAccessToken(token: String): Option[User] = {
+    findByProperty("accessToken", token, s"No user found with token: $token")
+  }
 
   override def revert(obj: MongoDBObject): User = {
     User(
@@ -44,7 +51,9 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
       getPassport(obj, "identification"),
       getString(obj, "ipAddress"),
       getString(obj, "email"),
-      getRoarType(obj, "roarType")
+      getRoarType(obj, "roarType"),
+      getOptional[String](obj, "accessToken"),
+      getOptional[String](obj, "refreshToken")
     )
   }
 }

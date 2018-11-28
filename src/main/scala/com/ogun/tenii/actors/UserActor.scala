@@ -19,21 +19,16 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
   protected val verifyUserActor: ActorRef = context.actorOf(Props[VerifyUserActor])
 
   override def receive: Receive = {
-    case req: RegisterRequest =>
-      val ref = sender()
+    case req: RegisterRequest => val ref = sender()
       val userSearch = connection.findByUsername(req.username)
       val emailSearch = connection.findByEmail(req.email)
       val mobileSearch = connection.findByMobile(req.mobile)
       (userSearch, emailSearch, mobileSearch) match {
-        case (None, None, None) => Future {
-          connection.save(req)
-        } onComplete {
+        case (None, None, None) => Future { connection.save(req) } onComplete {
           case Success(_) => connection.findByEmail(req.email) match {
-            case Some(res) =>
-              ref ! RegisterResponse(res.email, res.mobile)
+            case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
-            case None =>
-              logger.error(s"Unable to find user by email: ${req.email}")
+            case None => logger.error(s"Unable to find user by email: ${req.email}")
               ref ! RegisterResponse(req.email, req.mobile, success = false, Some(s"Unable to find user by email: ${req.email}"))
           }
           case Failure(t) => ref ! new Exception("Failed to save", t)
@@ -42,8 +37,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
       }
     //Check ip hasn't been blocked or given a timeout, if blocked return unable to submit request you have been blocked
     //Check password is valid, if not return invalid password failure
-    case req: TellerRegisterRequest =>
-      val ref = sender()
+    case req: TellerRegisterRequest => val ref = sender()
       val emailSearch = tellerConnection.findByEmail(req.email)
       val mobileSearch = tellerConnection.findByMobile(req.mobile)
       (emailSearch, mobileSearch) match {
@@ -51,19 +45,16 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
           tellerConnection.save(req)
         } onComplete {
           case Success(_) => tellerConnection.findByEmail(req.email) match {
-            case Some(res) =>
-              ref ! RegisterResponse(res.email, res.mobile)
+            case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
-            case None =>
-              logger.error(s"Unable to find user by email: ${req.email}")
+            case None => logger.error(s"Unable to find user by email: ${req.email}")
               ref ! RegisterResponse(req.email, req.mobile, success = false, Some(s"Unable to find user by email: ${req.email}"))
           }
           case Failure(t) => ref ! new Exception("Failed to save", t)
         }
         case _ => sender() ! RegisterResponse(req.email, req.mobile, success = false, Some("Credentials already used"))
       }
-    case req: TrulayerRegisterRequest =>
-      val ref = sender()
+    case req: TrulayerRegisterRequest => val ref = sender()
       val emailSearch = connection.findByEmail(req.email)
       val mobileSearch = connection.findByMobile(req.mobile)
       (emailSearch, mobileSearch) match {
@@ -71,19 +62,16 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
           connection.save(req)
         } onComplete {
           case Success(_) => connection.findByEmail(req.email) match {
-            case Some(res) =>
-              ref ! RegisterResponse(res.email, res.mobile)
+            case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
-            case None =>
-              logger.error(s"Unable to find user by email: ${req.email}")
+            case None => logger.error(s"Unable to find user by email: ${req.email}")
               ref ! RegisterResponse(req.email, req.mobile, success = false, Some(s"Unable to find user by email: ${req.email}"))
           }
           case Failure(t) => ref ! new Exception("Failed to save", t)
         }
         case _ => sender() ! RegisterResponse(req.email, req.mobile, success = false, Some("Credentials already used"))
       }
-    case request: LoginRequest =>
-      val ref = sender()
+    case request: LoginRequest => val ref = sender()
       Future {
         connection.findByUsername(request.username)
       } onComplete {
@@ -93,12 +81,10 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
             if (user.password.equals(request.password)) { ref ! LoginResponse(success = true) }
             else { ref ! LoginResponse(success = false, Some("INCORRECT_PASSWORD")) }
         }
-        case Failure(t) =>
-          logger.error("Unable to find user due to", t)
+        case Failure(t) => logger.error("Unable to find user due to", t)
           ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
       }
-    case request: TellerLoginRequest =>
-      val ref = sender()
+    case request: TellerLoginRequest => val ref = sender()
       Future {
         tellerConnection.findByEmail(request.email)
       } onComplete {
@@ -108,18 +94,15 @@ class UserActor extends Actor with LazyLogging with UserImplicits {
             if (user.password.equals(request.password)) { ref ! result.get.tellerId.get }
             else { ref ! LoginResponse(success = false, Some("INCORRECT_PASSWORD")) }
         }
-        case Failure(t) =>
-          logger.error("Unable to find user due to", t)
+        case Failure(t) => logger.error("Unable to find user due to", t)
           ref ! LoginResponse(success = false, Some("USER_NOT_FOUND"))
       }
-    case request: PasswordUserLookupRequest =>
-      val senderRef = sender()
+    case request: PasswordUserLookupRequest => val senderRef = sender()
       Future {
         connection.findByUsername(request.passwordRequest.username)
       } onComplete {
         case Success(user) => senderRef ! PasswordUserLookupResponse(request.actorRef, user)
-        case Failure(t) =>
-          logger.error(s"Could not find the user due to an error", t)
+        case Failure(t) => logger.error(s"Could not find the user due to an error", t)
           senderRef ! PasswordUserLookupResponse(request.actorRef, None)
       }
     case request: TellerAPIPermissionsResponse => Future {
