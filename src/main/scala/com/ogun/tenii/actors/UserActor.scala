@@ -59,7 +59,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
                 s"$paymentsApiHost$createPot",
                 TeniiPotCreateRequest(res.id.get.toString, req.roarType.limit.getOrElse(100))
               ) onComplete {
-                case Success(resp) => logger.info(s"Created a Tenii pot for user ${resp.tellerUserId}")
+                case Success(resp) => logger.info(s"Created a Tenii pot for user ${res.id.get.toString}")
                 case Failure(t) => logger.error(s"Failed to create Tenii pot, please check and fix: $req", t)
               }
             case None => logger.error(s"Unable to find user by email: ${req.email}")
