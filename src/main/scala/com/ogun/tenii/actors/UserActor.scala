@@ -82,7 +82,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
                 TrulayerLoginRequest(user.id.get.toString)) onComplete {
                 case Success(resp) => logger.info(s"Created a Tenii pot for user $resp")
                   ref ! LoginResponse(accounts = resp.accounts)
-                case Failure(t) => logger.error(s"Failed to create load accounts, please check and fix: $request", t)
+                case Failure(t) => logger.error(s"Failed to load accounts, please check and fix: ${request.email}", t)
                   ref ! LoginResponse(errorCode = Some("Failed to create load accounts"))
               }
             }
