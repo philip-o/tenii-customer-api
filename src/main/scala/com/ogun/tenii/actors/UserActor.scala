@@ -49,6 +49,19 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
           case Success(_) => connection.findByEmail(req.email) match {
             case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
+              implicit val timeout: FiniteDuration = 30.seconds
+              http.endpoint[TrulayerLoginRequest, String](s"$trulayerApiHost$addTeniiId",
+                TrulayerLoginRequest(res.id.get.toString)) onComplete {
+                case Success(_) => logger.info(s"Added new tenii user to cache")
+                case Failure(t) => logger.error(s"Error thrown while trying to create entry for id", t)
+              }
+              http.endpoint[TeniiPotCreateRequest, TeniiPotCreateResponse](
+                s"$paymentsApiHost$createPot",
+                TeniiPotCreateRequest(res.id.get.toString, req.roarType.limit.getOrElse(100))
+              ) onComplete {
+                case Success(resp) => logger.info(s"Created a Tenii pot for user ${resp.tellerUserId}")
+                case Failure(t) => logger.error(s"Failed to create Tenii pot, please check and fix: $req", t)
+              }
             case None => logger.error(s"Unable to find user by email: ${req.email}")
               ref ! RegisterResponse(req.email, req.mobile, success = false, Some(s"Unable to find user by email: ${req.email}"))
           }
@@ -64,7 +77,6 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
           case None => ref ! LoginResponse(errorCode = Some("USER_NOT_FOUND"))
           case Some(user) => //TODO Check user has verified
             if (user.password.equals(request.password)) {
-              //TODO Load accounts
               implicit val timeout: FiniteDuration = 30.seconds
               http.endpoint[TrulayerLoginRequest, TrulayerAccountsResponse](s"$trulayerApiHost$login",
                 TrulayerLoginRequest(user.id.get.toString)) onComplete {

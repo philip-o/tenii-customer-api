@@ -28,9 +28,9 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Tenii
         userActor ! req
         senderRef ! TellerPermissionsResponse(Some(req.token))
         //TODO Load limit from register request and then update
-        http.endpoint[TellerTeniiPotCreateRequest, TellerTeniiPotCreateResponse](
+        http.endpoint[TeniiPotCreateRequest, TeniiPotCreateResponse](
           s"$paymentsApiHost$createPot",
-          TellerTeniiPotCreateRequest(req.token, 100)
+          TeniiPotCreateRequest(req.token, 100)
         ) onComplete {
             case Success(resp) => logger.info(s"Created a Tenii pot for user $resp")
             case Failure(t) => logger.error(s"Failed to create Tenii pot, please check and fix: $req", t)

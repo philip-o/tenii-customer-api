@@ -8,6 +8,7 @@ trait TeniiEndpoints {
   val createPot = "teller/createPot/"
   val bankAccounts = "teller/bankAccounts"
   val login = "login"
+  val addTeniiId = "newUser"
 
   implicit def onSuccessDecodingError[TellerResponse](decodingError: io.circe.Error): TellerResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
   implicit def onErrorDecodingError[TellerResponse](decodingError: String): TellerResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
