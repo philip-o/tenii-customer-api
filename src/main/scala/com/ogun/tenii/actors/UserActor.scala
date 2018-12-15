@@ -71,7 +71,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
       }
     case request: LoginRequest => val ref = sender()
       Future {
-        connection.findByUsername(request.email)
+        connection.findByEmail(request.email)
       } onComplete {
         case Success(result) => result match {
           case None => ref ! LoginResponse(errorCode = Some("USER_NOT_FOUND"))
