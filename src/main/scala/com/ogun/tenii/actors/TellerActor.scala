@@ -1,17 +1,17 @@
 package com.ogun.tenii.actors
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.ogun.tenii.domain.api._
-import com.ogun.tenii.domain.teller.{ TellerAccountsRequest, TellerAccountsResponse, TellerResponse }
-import com.ogun.tenii.external.HttpTransfers
+import com.ogun.tenii.domain.teller.{TellerAccountsRequest, TellerAccountsResponse, TellerResponse}
+import com.ogun.tenii.external.{HttpTransfers, TeniiEndpoints}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.util.{ Failure, Properties, Success }
+import scala.util.{Failure, Properties, Success}
 
 class TellerActor extends Actor with TellerEndpoints with LazyLogging with TeniiEndpoints {
 
@@ -91,9 +91,6 @@ trait TellerEndpoints {
     }
   }
 
-  implicit def onSuccessDecodingError[TellerResponse](decodingError: io.circe.Error): TellerResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
-  implicit def onErrorDecodingError[TellerResponse](decodingError: String): TellerResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
-
   def validatePermissions(requestedPermissions: List[TellerPermissions] = requiredPermissions, providedPermissions: List[TellerPermissions], matches: Boolean = true): Boolean = {
     requestedPermissions match {
       case Nil => matches
@@ -104,13 +101,5 @@ trait TellerEndpoints {
       }
     }
   }
-}
-
-trait TeniiEndpoints {
-
-  val paymentsApiHost = "https://tenii-payments-api.herokuapp.com/"
-  val productsApiHost = "https://tenii-products-api.herokuapp.com/"
-  val createPot = "teller/createPot/"
-  val bankAccounts = "teller/bankAccounts"
 }
 
