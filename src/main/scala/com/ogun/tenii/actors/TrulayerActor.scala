@@ -31,26 +31,8 @@ class TrulayerActor extends Actor with LazyLogging with TrulayerEndpoint {
       implicit val timeout: Timeout = Timeout(10.seconds)
       (userActor ? request) onComplete {
         case Success(_) => senderRef ! s"$trulayerHost$responseType&$clientIdParam$clientId&$nonceParam${UUID.randomUUID().toString}&$permissionsParam"
+          //TODO load tenii id and then send to tenii trulayer api to cache and send to payments to create pot
         case Failure(t) => logger.error(s"Error thrown when attempting to register user", t)
-      }
-    case request: TrulayerAccessToken =>
-      val senderRef = sender()
-      Future {
-        connection.findByNoAccessToken()
-      } onComplete {
-        case Success(userOpt) => userOpt match {
-          case Some(user) => Future {
-            connection.save(user.copy(accessToken = Some(request.accessToken), refreshToken = Some(request.refreshToken)))
-          } onComplete {
-            case Success(_) => senderRef ! TrulayerAccessTokenResponse()
-            case Failure(t) => logger.error(s"Error thrown when saving user, please check: $request", t)
-              senderRef ! TrulayerAccessTokenResponse(Some("Error thrown when saving user"))
-          }
-          case None => logger.error(s"Did not find a user with no token, please check: $request")
-            senderRef ! TrulayerAccessTokenResponse(Some("Did not find a user with no token"))
-        }
-        case Failure(t) => logger.error(s"Error thrown when looking for user, please check: $request", t)
-          senderRef ! TrulayerAccessTokenResponse(Some("Error thrown when looking for user"))
       }
     case other => logger.error(s"Unknown message received: $other")
   }
@@ -63,4 +45,8 @@ trait TrulayerEndpoint {
   val clientIdParam = "client_id="
   val nonceParam = "nonce="
   val permissionsParam = "scope=info%20accounts%20balance%20transactions%20cards%20offline_access&redirect_uri=https://tenii-demo.herokuapp.com/postauth&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=false&enable_credentials_sharing_providers=true"
+}
+
+trait TeniiTrulayerApiEndpoint {
+
 }

@@ -45,6 +45,8 @@ class VerifyUserActor extends Actor with LazyLogging with UserImplicits {
             logger.error("Unable to save, please check urgently, cannot find entry, maybe no longer valid")
             senderRef ! VerifyAccountResponse(status = false, Some("Unable to find entry, no longer valid?"))
         }
+        case Failure(t) => logger.error("Unable to find user, please check urgently", t)
+          senderRef ! VerifyAccountResponse(status = false, Some("Unable to find user"))
       }
   }
 }

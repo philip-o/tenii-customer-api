@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.ogun.tenii.domain.api.{ RegisterRequest, TellerRegisterRequest, TrulayerRegisterRequest }
 import com.ogun.tenii.domain.common.{ Address, Passport }
-import com.ogun.tenii.domain.db.{ TellerUser, User, VerifyUser }
+import com.ogun.tenii.domain.db.{ User, VerifyUser }
 import com.ogun.tenii.domain.verifyuser.VerifyEmailPersistRequest
 
 trait UserImplicits {
@@ -23,9 +23,7 @@ trait UserImplicits {
       identification = request.id,
       ipAddress = request.ipAddress,
       email = request.email,
-      roarType = request.roarType,
-      accessToken = None,
-      refreshToken = None
+      roarType = request.roarType
     )
   }
 
@@ -52,23 +50,7 @@ trait UserImplicits {
       ),
       ipAddress = request.ipAddress,
       email = request.email,
-      roarType = request.roarType,
-      accessToken = None,
-      refreshToken = None
-    )
-  }
-
-  implicit def toTellerUser(request: TellerRegisterRequest): TellerUser = {
-    TellerUser(
-      title = request.title,
-      forename = request.forename,
-      surname = request.surname,
-      dob = request.dob,
-      password = request.password,
-      mobile = request.mobile,
-      email = request.email,
-      roarType = request.roarType,
-      ipAddress = request.ipAddress
+      roarType = request.roarType
     )
   }
 

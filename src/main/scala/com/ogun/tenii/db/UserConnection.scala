@@ -1,7 +1,7 @@
 package com.ogun.tenii.db
 
 import com.mongodb.casbah.Imports._
-import com.ogun.tenii.domain.db.{ TellerUser, User }
+import com.ogun.tenii.domain.db.User
 import com.typesafe.scalalogging.LazyLogging
 
 class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
@@ -11,7 +11,7 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
   override def transform(obj: User): MongoDBObject = {
     MongoDBObject("_id" -> obj.id, "title" -> obj.title, "forename" -> obj.forename, "middle" -> obj.middle, "surname" -> obj.surname, "address" -> obj.address,
       "dob" -> obj.dob, "username" -> obj.username, "password" -> obj.password, "mobile" -> obj.mobile, "identification" -> obj.identification,
-      "ipAddress" -> obj.ipAddress, "email" -> obj.email, "roarType" -> obj.roarType, "accessToken" -> obj.accessToken, "refreshToken" -> obj.refreshToken)
+      "ipAddress" -> obj.ipAddress, "email" -> obj.email, "roarType" -> obj.roarType)
   }
 
   def findByUsername(name: String): Option[User] = {
@@ -28,14 +28,6 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
 
   def findById(id: String): Option[User] = findByObjectId(id, s"No user found with id: $id")
 
-  def findByNoAccessToken(): Option[User] = {
-    findAll(s"No users found").find(_.accessToken.isEmpty)
-  }
-
-  def findByAccessToken(token: String): Option[User] = {
-    findByProperty("accessToken", token, s"No user found with token: $token")
-  }
-
   override def revert(obj: MongoDBObject): User = {
     User(
       Some(getObjectId(obj, "_id")),
@@ -49,59 +41,6 @@ class UserConnection extends ObjectMongoConnection[User] with LazyLogging {
       getString(obj, "password"),
       getString(obj, "mobile"),
       getPassport(obj, "identification"),
-      getString(obj, "ipAddress"),
-      getString(obj, "email"),
-      getRoarType(obj, "roarType"),
-      getOptional[String](obj, "accessToken"),
-      getOptional[String](obj, "refreshToken")
-    )
-  }
-}
-
-class TellerUserConnection extends ObjectMongoConnection[TellerUser] with LazyLogging {
-
-  val collection = "tellerUsers"
-
-  override def transform(obj: TellerUser): MongoDBObject = {
-    MongoDBObject("_id" -> obj.id, "title" -> obj.title, "forename" -> obj.forename, "surname" -> obj.surname,
-      "dob" -> obj.dob, "password" -> obj.password, "mobile" -> obj.mobile,
-      "ipAddress" -> obj.ipAddress, "email" -> obj.email, "roarType" -> obj.roarType, "tellerId" -> obj.tellerId)
-  }
-
-  def findByUsername(name: String): Option[TellerUser] = {
-    findByProperty("username", name, s"No user found with username: $name")
-  }
-
-  def findByEmail(email: String): Option[TellerUser] = {
-    findByProperty("email", email, s"No user found with email: $email")
-  }
-
-  def findByMobile(mobile: String): Option[TellerUser] = {
-    findByProperty("mobile", mobile, s"No user found with mobile: $mobile")
-  }
-
-  def findById(id: String): Option[TellerUser] =
-    findByObjectId(id, s"No user found with id: $id")
-
-  def findByNoTellerId(): Option[TellerUser] = {
-    val list = findAll("No users in collection")
-    if (list.isEmpty)
-      None
-    else {
-      list.find(_.tellerId.getOrElse("None") == "None")
-    }
-  }
-
-  override def revert(obj: MongoDBObject): TellerUser = {
-    TellerUser(
-      Some(getObjectId(obj, "_id")),
-      getOptional[String](obj, "tellerId"),
-      getString(obj, "title"),
-      getString(obj, "forename"),
-      getString(obj, "surname"),
-      getString(obj, "dob"),
-      getString(obj, "password"),
-      getString(obj, "mobile"),
       getString(obj, "ipAddress"),
       getString(obj, "email"),
       getRoarType(obj, "roarType")

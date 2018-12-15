@@ -40,7 +40,7 @@ class TellerActor extends Actor with TellerEndpoints with LazyLogging with Tenii
       }
     case request: LoginRequest =>
       val senderRef = sender()
-      http.endpointGet[List[TellerResponse]](s"$productsApiHost$bankAccounts", ("Authorization", s"Bearer ${request.username}")).onComplete {
+      http.endpointGet[List[TellerResponse]](s"$productsApiHost$bankAccounts", ("Authorization", s"Bearer ${request.email}")).onComplete {
         case Success(resp) => senderRef ! resp
         case Failure(t) => sender() ! t
       }

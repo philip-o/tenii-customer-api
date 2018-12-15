@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.TrulayerActor
-import com.ogun.tenii.domain.api.{TrulayerAccessToken, TrulayerAccessTokenResponse, TrulayerRegisterRequest}
+import com.ogun.tenii.domain.api.{LoginRequest, TrulayerRegisterRequest}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -24,7 +24,7 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   protected val trulayerActor: ActorRef = system.actorOf(Props(classOf[TrulayerActor]))
 
   def route: Route = pathPrefix("trulayer") {
-    register ~ saveAccessToken
+    register ~ login
   }
 
   def register: Route = {
@@ -43,14 +43,15 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
     }
   }
 
-  def saveAccessToken: Route = {
+  def login: Route = {
     post {
-      path("addToken") {
-        entity(as[TrulayerAccessToken]) { request =>
-          logger.debug(s"POST /addToken")
+      path("login") {
+        entity(as[LoginRequest]) { request =>
+          logger.info(s"POST /login - $request")
           onCompleteWithBreaker(breaker)(trulayerActor ? request) {
-            case Success(msg: TrulayerAccessTokenResponse) if msg.errorCode.nonEmpty => complete(StatusCodes.NotAcceptable -> msg)
-            case Success(msg: TrulayerAccessTokenResponse) => complete(StatusCodes.OK -> msg)
+            case Success(msg: String) =>
+              logger.debug(s"URL is $msg")
+              complete(StatusCodes.OK -> msg)
             case Failure(t) => failWith(t)
           }
         }
