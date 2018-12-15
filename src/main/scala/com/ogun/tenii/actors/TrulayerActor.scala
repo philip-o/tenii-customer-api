@@ -31,7 +31,6 @@ class TrulayerActor extends Actor with LazyLogging with TrulayerEndpoint {
       implicit val timeout: Timeout = Timeout(10.seconds)
       (userActor ? request) onComplete {
         case Success(_) => senderRef ! s"$trulayerHost$responseType&$clientIdParam$clientId&$nonceParam${UUID.randomUUID().toString}&$permissionsParam"
-          //TODO load tenii id and then send to tenii trulayer api to cache and send to payments to create pot
         case Failure(t) => logger.error(s"Error thrown when attempting to register user", t)
       }
     case other => logger.error(s"Unknown message received: $other")

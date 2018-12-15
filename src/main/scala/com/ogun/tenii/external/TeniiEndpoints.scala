@@ -5,7 +5,7 @@ trait TeniiEndpoints {
   val paymentsApiHost = "https://tenii-payments-api.herokuapp.com/"
   val productsApiHost = "https://tenii-products-api.herokuapp.com/"
   val trulayerApiHost = "https://tenii-trulayer-api.herokuapp.com/"
-  val createPot = "teller/createPot/"
+  val createPot = "pot"
   val bankAccounts = "teller/bankAccounts"
   val login = "login"
   val addTeniiId = "newUser"
