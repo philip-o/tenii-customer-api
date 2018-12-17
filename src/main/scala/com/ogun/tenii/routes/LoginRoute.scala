@@ -33,7 +33,7 @@ class LoginRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends 
         logger.info(s"POST /login - $request")
         onCompleteWithBreaker(breaker)(userActor ? request) {
           case Success(msg: LoginResponse) if msg.errorCode.nonEmpty => complete(StatusCodes.InternalServerError -> msg)
-          case Success(msg: LoginResponse) => complete(StatusCodes.OK -> TrulayerAccountsResponse(msg.accounts))
+          case Success(msg: LoginResponse) => complete(StatusCodes.OK -> TrulayerAccountsResponse(accounts = msg.accounts, teniiId = msg.teniiId))
           case Failure(t) => failWith(t)
         }
       }

@@ -24,7 +24,7 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   protected val trulayerActor: ActorRef = system.actorOf(Props(classOf[TrulayerActor]))
 
   def route: Route = pathPrefix("trulayer") {
-    register ~ login
+    register
   }
 
   def register: Route = {
@@ -32,22 +32,6 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
       path("register") {
         entity(as[TrulayerRegisterRequest]) { request =>
           logger.info(s"POST /register - $request")
-          onCompleteWithBreaker(breaker)(trulayerActor ? request) {
-            case Success(msg: String) =>
-              logger.debug(s"URL is $msg")
-              complete(StatusCodes.OK -> msg)
-            case Failure(t) => failWith(t)
-          }
-        }
-      }
-    }
-  }
-
-  def login: Route = {
-    post {
-      path("login") {
-        entity(as[LoginRequest]) { request =>
-          logger.info(s"POST /login - $request")
           onCompleteWithBreaker(breaker)(trulayerActor ? request) {
             case Success(msg: String) =>
               logger.debug(s"URL is $msg")

@@ -15,6 +15,6 @@ case class AccountNumbers(number: String, sort_code: String)
 
 case class TrulayerAccount(account_id: String, account_type: String, account_number: AccountNumbers, currency: String, provider: Provider, balance: Double)
 
-case class TrulayerAccountsResponse(accounts: List[TrulayerAccount], accessToken: String = "", refreshToken: String = "", error: Option[String] = None)
+case class TrulayerAccountsResponse(accounts: List[TrulayerAccount], accessToken: String = "", refreshToken: String = "", error: Option[String] = None, teniiId: Option[String] = None)
 
 case class TrulayerLoginRequest(teniiId: String)
