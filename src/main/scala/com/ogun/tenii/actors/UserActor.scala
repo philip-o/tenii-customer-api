@@ -90,14 +90,6 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
         case Failure(t) => logger.error("Unable to find user due to", t)
           ref ! LoginResponse(errorCode = Some("USER_NOT_FOUND"))
       }
-    case request: PasswordUserLookupRequest => val senderRef = sender()
-      Future {
-        connection.findByUsername(request.passwordRequest.username)
-      } onComplete {
-        case Success(user) => senderRef ! PasswordUserLookupResponse(request.actorRef, user)
-        case Failure(t) => logger.error(s"Could not find the user due to an error", t)
-          senderRef ! PasswordUserLookupResponse(request.actorRef, None)
-      }
     case other => logger.error(s"Received unknown message, please check: $other")
   }
 }
