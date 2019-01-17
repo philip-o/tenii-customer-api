@@ -29,6 +29,7 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
     register
   }
 
+  @Path("register")
   @ApiOperation(
     httpMethod = "POST",
     response = classOf[TrulayerRegisterRequest],
