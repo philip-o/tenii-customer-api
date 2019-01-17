@@ -2,7 +2,7 @@ package com.ogun.tenii.domain.impicits
 
 import java.util.UUID
 
-import com.ogun.tenii.domain.api.{ RegisterRequest, TellerRegisterRequest, TrulayerRegisterRequest }
+import com.ogun.tenii.domain.api.{ RegisterRequest, TrulayerRegisterRequest }
 import com.ogun.tenii.domain.common.{ Address, Passport }
 import com.ogun.tenii.domain.db.{ User, VerifyUser }
 import com.ogun.tenii.domain.verifyuser.VerifyEmailPersistRequest
