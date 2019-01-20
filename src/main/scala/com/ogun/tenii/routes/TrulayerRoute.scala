@@ -25,7 +25,7 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   implicit val timeout: Timeout = Timeout(10.seconds)
   protected val trulayerActor: ActorRef = system.actorOf(Props(classOf[TrulayerActor]))
 
-  def route: Route = pathPrefix("trulayer") {
+  def route: Route = pathPrefix("register") {
     register
   }
 
