@@ -25,13 +25,12 @@ object TeniiApp extends App with LazyLogging with RouteConcatenation with Swagge
 
   val loginRoute = new LoginRoute().route
   val passwordResetRoute = new PasswordResetRoute().route
-  val registerRoute = new RegisterRoute().route
+  val registerRoute = new TrulayerRoute().route
   val verifyRoute = new VerifyRoute().route
-  val trulayerRoute = new TrulayerRoute().route
   val pingRoute = new PingRoute().route
   val swaggerDocRoute = new SwaggerDocRoute
 
-  val routes = loginRoute ~ passwordResetRoute ~ verifyRoute ~ trulayerRoute ~ pingRoute ~ swaggerSiteRoute ~ swaggerDocRoute.routes
+  val routes = loginRoute ~ passwordResetRoute ~ verifyRoute ~ pingRoute ~ swaggerSiteRoute ~ swaggerDocRoute.routes
 
   val port = Properties.envOrElse("PORT", "8080").toInt
   Http().bindAndHandle(routes, "0.0.0.0", port)

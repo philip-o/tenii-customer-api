@@ -17,8 +17,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-@Path("trulayer")
-@Api(value = "/trulayer", description = "Register endpoint", produces = "application/json")
+@Path("register")
+@Api(value = "/register", description = "Register endpoint", produces = "application/json")
 class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
 
   implicit val executor: ExecutionContext = system.dispatcher
@@ -29,7 +29,6 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
     register
   }
 
-  @Path("register")
   @ApiOperation(
     httpMethod = "POST",
     response = classOf[TrulayerRegisterRequest],
@@ -57,15 +56,13 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   ))
   def register: Route = {
     post {
-      path("register") {
-        entity(as[TrulayerRegisterRequest]) { request =>
-          logger.info(s"POST /register - $request")
-          onCompleteWithBreaker(breaker)(trulayerActor ? request) {
-            case Success(msg: String) =>
-              logger.debug(s"URL is $msg")
-              complete(StatusCodes.OK -> msg)
-            case Failure(t) => failWith(t)
-          }
+      entity(as[TrulayerRegisterRequest]) { request =>
+        logger.info(s"POST /register - $request")
+        onCompleteWithBreaker(breaker)(trulayerActor ? request) {
+          case Success(msg: String) =>
+            logger.debug(s"URL is $msg")
+            complete(StatusCodes.OK -> msg)
+          case Failure(t) => failWith(t)
         }
       }
     }
