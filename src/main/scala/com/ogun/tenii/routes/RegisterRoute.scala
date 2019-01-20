@@ -19,7 +19,7 @@ import scala.util.{Failure, Success}
 
 @Path("register")
 @Api(value = "/register", description = "Register endpoint", produces = "application/json")
-class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
+class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends RequestDirectives with LazyLogging {
 
   implicit val executor: ExecutionContext = system.dispatcher
   implicit val timeout: Timeout = Timeout(10.seconds)
@@ -54,7 +54,7 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
     new ApiResponse(code = 200, message = "Ok", response = classOf[String]),
     new ApiResponse(code = 500, message = "Internal Server Error", response = classOf[Throwable])
   ))
-  def register: Route = {
+  def register: Route =
     post {
       entity(as[TrulayerRegisterRequest]) { request =>
         logger.info(s"POST /register - $request")
@@ -66,5 +66,4 @@ class TrulayerRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
         }
       }
     }
-  }
 }

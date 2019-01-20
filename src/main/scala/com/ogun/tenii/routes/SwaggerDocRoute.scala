@@ -9,5 +9,5 @@ import scala.reflect.runtime.{universe => ru}
 class SwaggerDocRoute(implicit system: ActorSystem, mat: ActorMaterializer) extends SwaggerHttpService with HasActorSystem {
   override implicit val actorSystem: ActorSystem = system
   override implicit val materializer: ActorMaterializer = mat
-  override val apiTypes = Seq(ru.typeOf[LoginRoute], ru.typeOf[PingRoute], ru.typeOf[TrulayerRoute], ru.typeOf[PasswordResetRoute])
+  override val apiTypes = Seq(ru.typeOf[LoginRoute], ru.typeOf[PingRoute], ru.typeOf[RegisterRoute], ru.typeOf[PasswordResetRoute])
 }
