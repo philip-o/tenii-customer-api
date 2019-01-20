@@ -1,6 +1,6 @@
 package com.ogun.tenii.domain.common
 
-case class RoarType(roar: String, limit: Option[Int] = None)
+case class RoarType(roar: String, limit: Int)
 
 object Roar extends Enumeration {
   type Roar = Value

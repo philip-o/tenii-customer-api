@@ -139,10 +139,10 @@ trait ObjectMongoConnection[A] extends LazyLogging {
   protected def getRoarType(obj: MongoDBObject, name: String) = {
     val res = getBasicDBList(obj, name).get
     val roarType = RoarType(
-      res.get(0).asInstanceOf[String]
+      res.get(0).asInstanceOf[String], 100
     )
     if (res.size() == 2)
-      roarType.copy(limit = Option(res.get(1).asInstanceOf[Int]))
+      roarType.copy(limit = res.get(1).asInstanceOf[Int])
     else
       roarType
   }
