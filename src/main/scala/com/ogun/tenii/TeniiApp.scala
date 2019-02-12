@@ -24,7 +24,7 @@ object TeniiApp extends App with LazyLogging with RouteConcatenation with Swagge
   implicit val breaker = CircuitBreaker(system.scheduler, 20, 100 seconds, 12 seconds)
 
   val loginRoute = new LoginRoute().route
-  val passwordResetRoute = new PasswordResetRoute().route
+  val passwordResetRoute = new PasswordRoute().route
   val registerRoute = new RegisterRoute().route
   val verifyRoute = new VerifyRoute().route
   val pingRoute = new PingRoute().route

@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.UserActor
-import com.ogun.tenii.domain.api.{LoginRequest, LoginResponse, TrulayerAccountsResponse}
+import com.ogun.tenii.domain.api.{ErrorResponse, LoginRequest, LoginResponse, TrulayerAccountsResponse}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -45,8 +45,8 @@ class LoginRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends 
     new ApiImplicitParam(name = "ipAddress", dataType = "string", paramType = "body", value = "The ip address for the user's client", required = true)
   ))
   @ApiResponses(Array(
-    new ApiResponse(code = 201, message = "Created", response = classOf[LoginResponse]),
-    new ApiResponse(code = 400, message = "Bad request", response = classOf[TrulayerAccountsResponse]),
+    new ApiResponse(code = 200, message = "Ok", response = classOf[TrulayerAccountsResponse]),
+    new ApiResponse(code = 400, message = "Bad request", response = classOf[ErrorResponse]),
     new ApiResponse(code = 500, message = "Internal Server Error", response = classOf[Throwable])
   ))
   def login: Route = {
@@ -54,8 +54,8 @@ class LoginRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends 
       entity(as[LoginRequest]) { request =>
         logger.info(s"POST /login - $request")
         onCompleteWithBreaker(breaker)(userActor ? request) {
-          case Success(msg: LoginResponse) if msg.errorCode.nonEmpty => complete(StatusCodes.InternalServerError -> msg)
           case Success(msg: LoginResponse) => complete(StatusCodes.OK -> TrulayerAccountsResponse(accounts = msg.accounts, teniiId = msg.teniiId))
+          case Success(msg: ErrorResponse)  => complete(StatusCodes.InternalServerError -> msg)
           case Failure(t) => failWith(t)
         }
       }

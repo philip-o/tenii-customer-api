@@ -1,14 +1,15 @@
 package com.ogun.tenii.actors
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{Actor, ActorRef, Props}
 import com.ogun.tenii.db.UserConnection
-import com.ogun.tenii.domain.api.{ PasswordResetRequest, PasswordResetResponse }
-import com.ogun.tenii.domain.password.{ PasswordUserLookupRequest, PasswordUserLookupResponse }
+import com.ogun.tenii.domain.api
+import com.ogun.tenii.domain.api.{ErrorResponse, PasswordResetRequest, PasswordResetResponse}
+import com.ogun.tenii.domain.password.{PasswordUserLookupRequest, PasswordUserLookupResponse}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class PasswordActor extends Actor with LazyLogging {
 
@@ -33,12 +34,13 @@ class PasswordActor extends Actor with LazyLogging {
           } onComplete {
             case Success(_) => senderRef ! PasswordResetResponse(success = true, None, Some(password))
             //TODO Send email to user with new password
-            case Failure(t) => senderRef ! PasswordResetResponse(success = false, Some("PASSWORD_SAVE_FAILED"), None)
+            case Failure(t) => logger.error(s"Error thrown when trying to save update: $user", t)
+              senderRef ! ErrorResponse("PASSWORD_SAVE_FAILED", Some(s"Error thrown due to $t"))
           }
-          case None => senderRef ! PasswordResetResponse(success = false, Some("USER_NOT_FOUND"), None)
+          case None => senderRef ! ErrorResponse("USER_NOT_FOUND", None)
         }
         case Failure(t) => logger.error(s"Could not find the user due to an error", t)
-          senderRef ! PasswordUserLookupResponse(senderRef, None)
+          senderRef ! api.ErrorResponse("SEARCH_ERROR")
       }
 
     case resp: PasswordUserLookupResponse =>

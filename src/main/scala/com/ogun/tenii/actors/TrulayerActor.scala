@@ -5,19 +5,15 @@ import java.util.UUID
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.ogun.tenii.db.UserConnection
-import com.ogun.tenii.domain.api.{TrulayerAccessToken, TrulayerAccessTokenResponse, TrulayerRegisterRequest}
+import com.ogun.tenii.domain.api._
 import com.ogun.tenii.external.HttpTransfers
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Properties, Success}
 
 class TrulayerActor extends Actor with LazyLogging with TrulayerEndpoint {
-
-  private val connection = new UserConnection
 
   implicit val system: ActorSystem = context.system
   val http = new HttpTransfers()
@@ -30,6 +26,7 @@ class TrulayerActor extends Actor with LazyLogging with TrulayerEndpoint {
       val senderRef = sender()
       implicit val timeout: Timeout = Timeout(10.seconds)
       (userActor ? request) onComplete {
+        case Success(resp: RegisterResponse) if !resp.success => senderRef ! ErrorResponse("NO_USER_ERROR")
         case Success(_) => senderRef ! s"$trulayerHost$responseType&$clientIdParam$clientId&$nonceParam${UUID.randomUUID().toString}&$permissionsParam"
         case Failure(t) => logger.error(s"Error thrown when attempting to register user", t)
       }

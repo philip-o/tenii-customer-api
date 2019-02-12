@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.VerifyUserActor
-import com.ogun.tenii.domain.api.{VerifyAccountRequest, VerifyAccountResponse}
+import com.ogun.tenii.domain.api.{ErrorResponse, VerifyAccountRequest, VerifyAccountResponse}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -46,6 +46,7 @@ class VerifyRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Ok", response = classOf[VerifyAccountResponse]),
+    new ApiResponse(code = 400, message = "Bad Request", response = classOf[ErrorResponse]),
     new ApiResponse(code = 500, message = "Internal Server Error", response = classOf[Throwable])
   ))
   def verify: Route = {
@@ -53,6 +54,7 @@ class VerifyRoute(implicit system: ActorSystem, breaker: CircuitBreaker) extends
       entity(as[VerifyAccountRequest]) { request =>
         logger.info(s"POST /verify - $request")
         onCompleteWithBreaker(breaker)(verifyActor ? request) {
+          case Success(msg: VerifyAccountResponse) if !msg.status => complete(StatusCodes.BadRequest -> ErrorResponse(msg.reason.get))
           case Success(msg: VerifyAccountResponse) => complete(StatusCodes.OK -> msg)
           case Failure(t) => failWith(t)
         }

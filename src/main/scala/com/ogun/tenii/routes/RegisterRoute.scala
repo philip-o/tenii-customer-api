@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.TrulayerActor
-import com.ogun.tenii.domain.api.TrulayerRegisterRequest
+import com.ogun.tenii.domain.api.{ErrorResponse, TrulayerRegisterRequest, TrulayerRegisterRequestV2}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -26,7 +26,7 @@ class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   protected val trulayerActor: ActorRef = system.actorOf(Props(classOf[TrulayerActor]))
 
   def route: Route = pathPrefix("register") {
-    register
+    register ~ registerWithProvider
   }
 
   @ApiOperation(
@@ -52,12 +52,28 @@ class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Ok", response = classOf[String]),
+    new ApiResponse(code = 400, message = "Bad request", response = classOf[ErrorResponse]),
     new ApiResponse(code = 500, message = "Internal Server Error", response = classOf[Throwable])
   ))
   def register: Route =
     post {
       entity(as[TrulayerRegisterRequest]) { request =>
         logger.info(s"POST /register - $request")
+        onCompleteWithBreaker(breaker)(trulayerActor ? request) {
+          case Success(msg: String) =>
+            logger.debug(s"URL is $msg")
+            complete(StatusCodes.OK -> msg)
+          case Success(msg: ErrorResponse) => complete(StatusCodes.BadRequest -> msg)
+          case Failure(t) => failWith(t)
+        }
+      }
+    }
+
+  def registerWithProvider: Route =
+    post {
+      path("provider")
+      entity(as[TrulayerRegisterRequestV2]) { request =>
+        logger.info(s"POST /registerWithProvider - $request")
         onCompleteWithBreaker(breaker)(trulayerActor ? request) {
           case Success(msg: String) =>
             logger.debug(s"URL is $msg")
