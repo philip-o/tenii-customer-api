@@ -10,6 +10,6 @@ trait TeniiEndpoints {
   val login = "login"
   val addTeniiId = "newUser"
 
-  implicit def onSuccessDecodingError[TellerResponse](decodingError: io.circe.Error): TellerResponse = throw new Exception(s"Error decoding trains upstream response: $decodingError")
-  implicit def onErrorDecodingError[TellerResponse](decodingError: String): TellerResponse = throw new Exception(s"Error decoding upstream error response: $decodingError")
+  implicit def onSuccessDecodingError[Response](decodingError: io.circe.Error): Response = throw new Exception(s"Error decoding upstream response: $decodingError")
+  implicit def onErrorDecodingError[Response](decodingError: String): Response = throw new Exception(s"Error decoding upstream error response: $decodingError")
 }
