@@ -19,6 +19,8 @@ case class TrulayerAccountsResponse(accounts: List[TrulayerAccount], accessToken
 
 case class TrulayerAddUserRequest(teniiId: String)
 
+case class Status(status: String)
+
 case class ThirdPartyAddUserAndBankRequest(teniiId: String, provider: String)
 
 case class UserAccountRequest(teniiId: String, provider: String)

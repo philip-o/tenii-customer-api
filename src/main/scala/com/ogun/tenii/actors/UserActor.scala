@@ -37,7 +37,7 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
               implicit val timeout: FiniteDuration = 30.seconds
               val userReq = TrulayerAddUserRequest(res.id.get.toString)
-              http.endpoint[TrulayerAddUserRequest, String](s"$trulayerApiHost$addTeniiId",
+              http.endpoint[TrulayerAddUserRequest, Status](s"$trulayerApiHost$addTeniiId",
                 userReq) onComplete {
                 case Success(_) => logger.info(s"Added new tenii user to cache")
                 case Failure(t) => logger.error(s"Error thrown while trying to create entry for id: $userReq", t)
