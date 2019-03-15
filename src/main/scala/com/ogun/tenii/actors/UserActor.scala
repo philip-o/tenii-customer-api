@@ -2,10 +2,8 @@ package com.ogun.tenii.actors
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.ogun.tenii.db.UserConnection
-import com.ogun.tenii.domain.api
 import com.ogun.tenii.domain.api._
 import com.ogun.tenii.domain.impicits.UserImplicits
-import com.ogun.tenii.domain.password.{PasswordUserLookupRequest, PasswordUserLookupResponse}
 import com.ogun.tenii.domain.verifyuser.VerifyEmailPersistRequest
 import com.ogun.tenii.external.{HttpTransfers, TeniiEndpoints}
 import com.typesafe.scalalogging.LazyLogging
