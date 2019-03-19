@@ -5,6 +5,7 @@ import com.ogun.tenii.db.UserConnection
 import com.ogun.tenii.domain.api
 import com.ogun.tenii.domain.api.{ErrorResponse, PasswordResetRequest, PasswordResetResponse}
 import com.ogun.tenii.domain.password.{PasswordUserLookupRequest, PasswordUserLookupResponse}
+import com.ogun.tenii.util.PasswordUtil
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,14 +22,13 @@ class PasswordActor extends Actor with LazyLogging {
       //TODO
       //Check when user last logged in?
       //Return password if valid user or reject and log ip address
-      //Pick random password using password util
       val senderRef = sender()
       userActor ! PasswordUserLookupRequest(sender(), req)
       Future {
         userConnection.findByEmail(req.email)
       } onComplete {
         case Success(resp) => resp match {
-          case Some(user) => val password = "password"
+          case Some(user) => val password = PasswordUtil.createPassword()
             Future {
             userConnection.save(user.copy(password = password))
           } onComplete {

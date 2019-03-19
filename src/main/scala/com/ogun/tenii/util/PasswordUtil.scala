@@ -1,5 +1,7 @@
 package com.ogun.tenii.util
 
+import scala.util.Random
+
 object PasswordUtil {
 
   //[0-9]
@@ -7,6 +9,26 @@ object PasswordUtil {
 
   //[- A-Za-zÀ-ÿ0-9]
   val ASCII_CHARACTERS: Seq[Int] = (65 to 90) ++ (97 to 122) ++ Set(32, 45) ++ NUMBER_ASCII_CHARACTERS
+
+  def createPassword() : String = {
+    val num = Random.nextInt(7)
+
+    def createRandomString(number: Int) = (Random.alphanumeric take number).toList.mkString("")
+
+    val randomString = createRandomString(num)
+    val result = if(num < 7) {
+      randomString + Random.nextInt(99) + createRandomString(num)
+    }
+    else {
+      randomString + Random.nextInt(99)
+    }
+
+    if(!isPasswordValid(result)) {
+      createPassword()
+    }
+    else
+      result
+  }
 
   def isPasswordValid(password: String): Boolean = {
     if (password.length > 9 && doesPasswordContainsValidCharacters(password) && doesPasswordContainOneNumber(password)) {
