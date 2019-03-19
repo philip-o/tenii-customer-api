@@ -48,7 +48,8 @@ class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
     new ApiImplicitParam(name = "email", dataType = "string", value = "The email address for the user", paramType = "body", required = true),
     new ApiImplicitParam(name = "password", dataType = "string", paramType = "body", value = "The password for the user", required = true),
     new ApiImplicitParam(name = "roarType", dataType = "com.ogun.tenii.domain.common.RoarType", value = "The roar type for the user", paramType = "body", required = true),
-    new ApiImplicitParam(name = "ipAddress", dataType = "string", paramType = "body", value = "The ip address for the user's client", required = true)
+    new ApiImplicitParam(name = "ipAddress", dataType = "string", paramType = "body", value = "The ip address for the user's client", required = true),
+    new ApiImplicitParam(name = "provider", dataType = "string", paramType = "body", value = "The bank the user is registering with", required = true)
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Ok", response = classOf[String]),
@@ -64,20 +65,6 @@ class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
             logger.debug(s"URL is $msg")
             complete(StatusCodes.OK -> msg)
           case Success(msg: ErrorResponse) => complete(StatusCodes.BadRequest -> msg)
-          case Failure(t) => failWith(t)
-        }
-      }
-    }
-
-  def registerWithProvider: Route =
-    post {
-      path("provider")
-      entity(as[TrulayerRegisterRequestV2]) { request =>
-        logger.info(s"POST /registerWithProvider - $request")
-        onCompleteWithBreaker(breaker)(trulayerActor ? request) {
-          case Success(msg: String) =>
-            logger.debug(s"URL is $msg")
-            complete(StatusCodes.OK -> msg)
           case Failure(t) => failWith(t)
         }
       }

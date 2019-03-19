@@ -22,7 +22,6 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
   val http = new HttpTransfers()
 
   override def receive: Receive = {
-      //TODO Remove.  Duplicated below with provider
     case req: TrulayerRegisterRequest => val ref = sender()
       val emailSearch = connection.findByEmail(req.email)
       val mobileSearch = connection.findByMobile(req.mobile)
@@ -34,39 +33,8 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
             case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
               verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
               implicit val timeout: FiniteDuration = 30.seconds
-              val userReq = TrulayerAddUserRequest(res.id.get.toString)
-              http.endpoint[TrulayerAddUserRequest, Status](s"$trulayerApiHost$addTeniiId",
-                userReq) onComplete {
-                case Success(_) => logger.info(s"Added new tenii user to cache")
-                case Failure(t) => logger.error(s"Error thrown while trying to create entry for id: $userReq", t)
-              }
-              http.endpoint[TeniiPotCreateRequest, TeniiPotCreateResponse](
-                s"$paymentsApiHost$createPot",
-                TeniiPotCreateRequest(res.id.get.toString, req.roarType.limit)
-              ) onComplete {
-                case Success(_) => logger.info(s"Created a Tenii pot for user ${res.id.get.toString}")
-                case Failure(t) => logger.error(s"Failed to create Tenii pot, please check and fix: $req", t)
-              }
-            case None => logger.error(s"Unable to find user by email: ${req.email}")
-              ref ! RegisterResponse(req.email, req.mobile, success = false, Some(s"Unable to find user by email: ${req.email}"))
-          }
-          case Failure(t) => ref ! new Exception("Failed to save", t)
-        }
-        case _ => sender() ! RegisterResponse(req.email, req.mobile, success = false, Some("Credentials already used"))
-      }
-    case req: TrulayerRegisterRequestV2 => val ref = sender()
-      val emailSearch = connection.findByEmail(req.email)
-      val mobileSearch = connection.findByMobile(req.mobile)
-      (emailSearch, mobileSearch) match {
-        case (None, None) => Future {
-          connection.save(req)
-        } onComplete {
-          case Success(_) => connection.findByEmail(req.email) match {
-            case Some(res) => ref ! RegisterResponse(res.email, res.mobile)
-              verifyUserActor ! VerifyEmailPersistRequest(res.id.get, res.email)
-              implicit val timeout: FiniteDuration = 30.seconds
               http.endpoint[TrulayerAddUserRequest, String](s"$trulayerApiHost$addTeniiId",
-                TrulayerAddUserRequest(res.id.get.toString)) onComplete {
+                TrulayerAddUserRequest(res.id.get.toString, req.provider)) onComplete {
                 case Success(_) => logger.info(s"Added new tenii user to cache")
                 case Failure(t) => logger.error(s"Error thrown while trying to create entry for id", t)
               }
@@ -93,8 +61,8 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
           case Some(user) => //TODO Check user has verified
             if (user.password.equals(request.password)) {
               implicit val timeout: FiniteDuration = 30.seconds
-              http.endpoint[TrulayerAddUserRequest, TrulayerAccountsResponse](s"$trulayerApiHost$login",
-                TrulayerAddUserRequest(user.id.get.toString)) onComplete {
+              http.endpoint[TeniiTrulayerLoginRequest, TrulayerAccountsResponse](s"$trulayerApiHost$login",
+                TeniiTrulayerLoginRequest(user.id.get.toString)) onComplete {
                 case Success(resp) => ref ! LoginResponse(accounts = resp.accounts, teniiId = Some(user.id.get.toString))
                 case Failure(t) => logger.error(s"Failed to load accounts, please check and fix: ${request.email}", t)
                   ref ! ErrorResponse("ACCOUNT_LOAD_ERROR", Some("Failed to create load accounts"))
