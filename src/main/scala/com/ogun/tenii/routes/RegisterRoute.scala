@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.{CircuitBreaker, ask}
 import akka.util.Timeout
 import com.ogun.tenii.actors.TrulayerActor
-import com.ogun.tenii.domain.api.{ErrorResponse, TrulayerRegisterRequest, TrulayerRegisterRequestV2}
+import com.ogun.tenii.domain.api.{ErrorResponse, TrulayerRegisterRequest}
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
