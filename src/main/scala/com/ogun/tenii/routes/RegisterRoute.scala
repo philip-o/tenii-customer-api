@@ -26,7 +26,7 @@ class RegisterRoute(implicit system: ActorSystem, breaker: CircuitBreaker) exten
   protected val trulayerActor: ActorRef = system.actorOf(Props(classOf[TrulayerActor]))
 
   def route: Route = pathPrefix("register") {
-    register ~ registerWithProvider
+    register
   }
 
   @ApiOperation(
