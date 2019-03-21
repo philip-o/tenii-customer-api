@@ -68,7 +68,12 @@ class UserActor extends Actor with LazyLogging with UserImplicits with TeniiEndp
                   ref ! ErrorResponse("ACCOUNT_LOAD_ERROR", Some("Failed to create load accounts"))
               }
             }
-            else { ref ! ErrorResponse("INCORRECT_PASSWORD") }
+            else {
+              //TODO
+              //Check when user last logged in?
+              //Return password if valid user or reject and log ip address
+              ref ! ErrorResponse("INCORRECT_PASSWORD")
+            }
         }
         case Failure(t) => logger.error("Unable to find user due to", t)
           ref ! ErrorResponse("USER_NOT_FOUND")
